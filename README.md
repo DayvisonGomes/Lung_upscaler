@@ -1,221 +1,204 @@
-# mamografIA_upscaler
+# lung_upscaler
 
-Repositório contendo todos os códigos para a realização da super-resolução em mamografias, utilizando o autoencoder kl e o modelo de difusão da Unet.
+Repositório contendo todos os códigos para a realização da super-resolução em imagens de tomografia computadorizada de pulmão, utilizando AutoencoderKL e modelos de difusão latente UNet.
 
-Esquema de pastas e arquivos:
+Este código faz parte da minha dissertação e do artigo:  
+**Importance of Conditioning in Latent Diffusion Models for Lung Computed Tomography Image Generation**
+
+## Estrutura de Pastas
 
 ```bash
 .
 ├── configs
 │   ├── aekl_configs
-│   │   └── aekl_v0.yaml
+│   │   ├── aekl_artigo.yaml
+│   │   ├── aekl_clinical.yaml
+│   │   └── ...
 │   ├── ldm_configs
-│   │   └── ldm_v0.yaml
+│   │   ├── ldm_v0.yaml
+│   │   ├── ldm_teste.yaml
+│   │   └── ...
+│   ├── ldm_cond_configs
+│   │   ├── ldm_pulmao_v2.yaml
+│   │   └── ...
+│   ├── vae_configs
+│   │   └── ...
+│   ├── vqvae_configs
+│   │   └── ...
 ├── src
 │   ├── preprocessing_data
+│   │   ├── 4d_lung_data_analise.py
+│   │   ├── best_100.py
+│   │   ├── convert_32.py
+│   │   ├── create_images_label.py
+│   │   ├── create_multiclass_mask.py
 │   │   ├── create_reference_img.py
-│   │   └── process_medical_images.py
+│   │   ├── creating_csv_a_part.py
+│   │   ├── creating_lung_mask.py
+│   │   ├── crop_imgs.py
+│   │   ├── get_radiomic_features.py
+│   │   ├── process_medical_images.py
+│   │   └── create_viz.py
 │   ├── test
 │   │   ├── bash
-│   │   │   └── upscale_test_set.sh
-│   │   └── upscale_test_set.py
+│   │   │   ├── upscale_test_set.sh
+│   │   │   └── upscale_imgs.sh
+│   │   ├── upscale_test_set.py
+│   │   ├── upscale_test_set_without_low_res.py
+│   │   ├── upscale_imgs.py
+│   │   ├── calculate_fid.py
+│   │   ├── calculate_metrics.py
+│   │   ├── recons_vqvae.py
+│   │   ├── generation_and_recons.py
+│   │   ├── util_transformations.py
+│   │   └── custom_transforms.py
 │   ├── train
 │   │   ├── bash
 │   │   │   ├── train_aekl.sh
 │   │   │   └── train_ldm.sh
 │   │   ├── train_aekl.py
 │   │   ├── train_ldm.py
+│   │   ├── train_ldm_without_low_res.py
+│   │   ├── train_vae.py
+│   │   ├── train_vqvae.py
 │   │   ├── util_training.py
-│   │   └── util_transformations.py
+│   │   ├── util_training_vae.py
+│   │   ├── util_training_vqvae.py
+│   │   ├── util_transformations.py
+│   │   └── custom_transforms.py
+├── notebooks
+│   ├── code_tcc_test.ipynb
+│   └── data_processing.ipynb
 ├── .dockerignore
 ├── .gitignore
 ├── Dockerfile
 ├── LICENSE
-└── README.md
+├── README.md
+├── requirements.txt
+└── create_image_docker.sh
 ```
-Explicação dos arquivos pela ordem do esquema de pastas e arquivos:
 
-A estrutura do projeto é organizada da seguinte forma:
+## Explicação dos Principais Arquivos
 
-## Configs
+### Configs
 
-### `aekl_configs`
-- Contém configurações relacionadas ao modelo Autoencoder KL.
+- **aekl_configs/**: Configurações do AutoencoderKL.
+- **ldm_configs/**: Configurações dos modelos Latent Diffusion.
+- **ldm_cond_configs/**: Configurações de modelos LDM condicionados (ex: com máscara de pulmão).
+- **vae_configs/**: Configurações para modelos VAE.
+- **vqvae_configs/**: Configurações para modelos VQ-VAE.
 
-    - **aekl_v0.yaml**: Arquivo de configuração contendo os hiperparâmetros para a versão 0 do modelo AEKL.
+### Pré-processamento (`src/preprocessing_data`)
 
-### `ldm_configs`
-- Contém configurações relacionadas ao modelo de difusão.
+Scripts para preparar os dados antes do treinamento:
+- **process_medical_images.py**: Gera arquivos `.tsv` com os caminhos das imagens para treino, validação e teste.
+- **create_reference_img.py**: Cria imagem de referência a partir de DICOM.
+- **create_images_label.py**: Classifica imagens por brilho.
+- **create_multiclass_mask.py**: Gera máscaras binárias/multiclasse para pulmão.
+- **creating_lung_mask.py**: Gera máscaras binárias para pulmão.
+- **crop_imgs.py**: Realiza crop nas imagens DICOM.
+- **convert_32.py**: Converte TIFF para float32 e normaliza.
+- **get_radiomic_features.py**: Extrai features radiômicas.
+- **create_viz.py**: Gera visualizações PNG das imagens.
+- **best_100.py**: Calcula MSSIM e seleciona melhores imagens.
+- **creating_csv_a_part.py**: Cria arquivos `.tsv` balanceados.
+- **4d_lung_data_analise.py**: Análise de dados 4D do pulmão.
 
-    - **ldm_v0.yaml**: Arquivo de configuração contendo os hiperparâmetros para a versão 0 do modelo LDM.
+### Treinamento (`src/train`)
 
-## SRC
+Scripts para treinar os modelos:
+- **train_aekl.py**: Treina o AutoencoderKL.
+- **train_ldm.py**: Treina o modelo Latent Diffusion.
+- **train_ldm_without_low_res.py**: Treina LDM sem imagens de baixa resolução.
+- **train_vae.py**: Treina Variational Autoencoder.
+- **train_vqvae.py**: Treina VQ-VAE.
+- **util_training.py / util_training_vae.py / util_training_vqvae.py**: Funções utilitárias para loops de treino, validação e métricas.
+- **util_transformations.py**: Funções para criação de dataloaders e transformações.
+- **custom_transforms.py**: Transformações customizadas para pipeline MONAI.
 
-### `preprocessing_data`
+### Teste e Avaliação (`src/test`)
 
-- **`create_reference_img.py`**: Script para criar uma imagem de referência que é necessária para o upscale das imagens.
+Scripts para avaliação dos modelos e geração de métricas:
+- **upscale_test_set.py**: Realiza upscale no conjunto de teste e salva métricas.
+- **upscale_test_set_without_low_res.py**: Teste sem imagens de baixa resolução.
+- **upscale_imgs.py**: Upscale de imagens médicas.
+- **calculate_fid.py / calculate_metrics.py**: Calcula FID, PSNR, MAE, MSSIM, SSIM.
+- **recons_vqvae.py / generation_and_recons.py**: Reconstrução e geração de imagens.
+- **util_transformations.py / custom_transforms.py**: Utilitários para dataloaders e transformações.
+- **bash/**: Scripts bash para rodar os processos via Docker.
 
-- **`process_medical_images.py`**: Script para processar as imagens médicas, no caso mamografias.
+### Notebooks
 
-### `test`
-
-#### Bash
-- **`upscale_test_set.sh`**: Script bash para rodar o processo de upscale nas imagens do subset de teste.
-
-#### Python
-- **`upscale_test_set.py`**: Script Python correspondente ao script bash.
-
-### `train`
-
-#### Bash
-- **`train_aekl.sh`**: Script bash para treinar o modelo AEKL.
-
-- **`train_ldm.sh`**: Script bash para treinar o modelo de difusão.
-
-#### Python
-- **`train_aekl.py`**: Script Python para treinar o modelo AEKL.
-
-- **`train_ldm.py`**: Script Python para treinar o modelo de difusão.
-
-- **`util_training.py`**: Utilitário com funções relacionadas ao treinamento.
-
-- **`util_transformations.py`**: Utilitário com funções relacionadas às transformações nas imagens, que são necessárias para o treinamento dos modelos.
+- **code_tcc_test.ipynb** e **data_processing.ipynb**: Exemplos e experimentos interativos.
 
 ## Arquivos de Configuração
 
-- **`.dockerignore`**: Arquivo para especificar os arquivos a serem ignorados durante a construção da imagem Docker.
-
-- **`.gitignore`**: Arquivo para especificar os arquivos a serem ignorados pelo Git.
-
-- **`Dockerfile`**: Arquivo para a construção da imagem Docker.
-
-- **`LICENSE`**: Licença do projeto.
+- **.dockerignore**: Arquivos ignorados na construção da imagem Docker.
+- **.gitignore**: Arquivos ignorados pelo Git.
+- **Dockerfile**: Construção da imagem Docker.
+- **LICENSE**: Licença Apache 2.0.
+- **requirements.txt**: Dependências do projeto.
+- **create_image_docker.sh**: Script para build da imagem Docker.
 
 ## Primeiros passos
 
-Primeiro é preciso ter o docker instalado na sua máquina, após isso é preciso buildar a sua imagem com o seguinte comando:
+1. **Construir a imagem Docker**
 
-```bash
-docker build -t <image-name> .
-```
-Isto é, se você estiver no diretório do DockerFile. Ou se preferir, rode o script "create_image_docker.sh" com:
+   Certifique-se de ter o Docker instalado. Execute:
 
-```bash
-chmod +x create_image_docker.sh
-sh -xe create_image_docker.sh
-```
+   ```bash
+   docker build -t <image-name> .
+   ```
+   Ou utilize o script:
 
-## Pré-processamento
+   ```bash
+   chmod +x create_image_docker.sh
+   sh -xe create_image_docker.sh
+   ```
 
-Após a criação da imagem docker, é preciso a criação de uma pasta chamada "data" onde irá conter todos os seus dados para que ao executar o .py "./src/preprocessing_data/process_medical_images.py", não de problemas.
+2. **Pré-processamento dos dados**
 
-```bash
-docker run -it 
-        --ipc=host 
-        -v ${PWD}:/project/ 
-        <image-name> 
-        python /project/src/preprocessing_data/process_medical_images.py 
-            --output_dir /project/outputs/tsv_files
-```
+   Crie uma pasta chamada `data` com os dados necessários. Execute o script para gerar os arquivos `.tsv`:
 
-Esse arquivo é responsável por criar três arquivos .tsv onde estaram os paths de cada imagem, um para cada subset, para editar as quantidades, sugir mudar no próprio arquivo (att futura). O output_dir é onde estará tais arquivos.
+   ```bash
+   docker run -it \
+       --ipc=host \
+       -v ${PWD}:/project/ \
+       <image-name> \
+       python /project/src/preprocessing_data/process_medical_images.py \
+           --output_dir /project/outputs/tsv_files
+   ```
 
-## Como treinar o modelo autoencoder
+3. **Treinamento dos modelos**
 
-Após a criação dos arquivos .tsv, já é possível o treinamento do autoencoder com o seguinte comando:
+   - **AutoencoderKL**
+     ```bash
+     chmod +x ./src/train/bash/train_aekl.sh
+     sh -xe ./src/train/bash/train_aekl.sh
+     ```
+   - **Latent Diffusion Model**
+     ```bash
+     chmod +x ./src/train/bash/train_ldm.sh
+     sh -xe ./src/train/bash/train_ldm.sh
+     ```
 
-```bash
-chmod +x ./src/train/bash/train_aekl.sh
-sh -xe ./src/train/bash/train_aekl.sh
-```
+4. **Realizar upscale nas imagens de teste**
 
-## Como treinar o modelo de difusão latente
+   ```bash
+   chmod +x ./src/test/bash/upscale_test_set.sh
+   sh -xe ./src/test/bash/upscale_test_set.sh
+   ```
 
-Após o treinamento do autoencoder, rode o seguinte comando para treinar o modelo de difusão
+5. **Avaliação e Métricas**
 
-```bash
-chmod +x ./src/train/bash/train_ldm.sh
-sh -xe ./src/train/bash/train_ldm.sh
-```
+   Utilize os scripts em `src/test` para calcular métricas como FID, PSNR, SSIM, MSSIM, MAE e gerar visualizações.
 
-## Como utilizar os modelos para realizar upscale
+## Observações
 
-### Subset de test
+- Para alterar hiperparâmetros, edite os arquivos `.yaml` em `configs/`.
+- Para modificar a quantidade de imagens em cada subset, edite diretamente os scripts de pré-processamento.
+- Os scripts bash facilitam a execução dos principais fluxos via Docker.
 
-Para realizar o upscale em algumas imagens do subset de teste, rode:
+---
 
-```bash
-chmod +x ./src/test/bash/upscale_test_set.sh
-sh -xe ./src/train/bash/upscale_test_set.sh
-```
-
-Para mudar os parâmetros, vá até os arquivos .sh para alterá-los.
-
-### Qualquer imagem / Métricas
-
-(terminar)
-
-## Referencial Teórico
-
-Começaremos falando sobre os modelos utilizados e quais métricas foram usadas neste trabalho.
-
-
-### Modelos
-
-#### Autoencoder
-Os Autoencoders são uma técnica de aprendizado não supervisionado, na qual usamos as redes neurais para a tarefa de aprendizado de representação. Especificamente, projetaremos uma arquitetura de rede neural de modo a impor um gargalo na rede que força uma representação de conhecimento compactada da entrada original.
-
-Autoencoders (AE) são redes neurais que visam copiar suas entradas para suas saídas. Eles trabalham compactando a entrada em uma representação de espaço latente e, em seguida, reconstruindo a saída dessa representação. Esse tipo de rede é composto de duas partes:
-
-Codificador (Encoder): é a parte da rede que compacta a entrada em uma representação de espaço latente (codificando a entrada).
-
-Decodificador (Decoder): Esta parte tem como objetivo reconstruir a entrada da representação do espaço latente.
-#### Autoencoder-KL
-
-O autoencoder variacional (VAE) com perda KL foi introduzido no trabalho "Auto-Encoding Variational Bayes" de Diederik P. Kingma e Max Welling. (https://arxiv.org/abs/1312.6114v11)
-é uma versão probabilística do AutoEncoder determinístico. Enquanto o AutoEncoder projeta a entrada para uma incorporação específica no espaço latente, o VAE projeta os dados de entrada para distribuições de probabilidade. Portanto, a vantagem do VAE é que ele pode gerar novos dados ou imagens, por meio de amostragem aleatória.
-
-Temos que ver como se parece uma distribuição normal e como calcular a divergência de Kullback-Leibler (KL), que é a função objetivo para otimizar a incorporação do espaço latente do VAE a partir da distribuição.
-
-##### Distribuição Normal
-Uma distribuição normal ou distribuição gaussiana é um tipo de distribuição de probabilidade contínua para uma variável aleatória com valores reais.
-
-A equação que representa essa distribuição é:
-
-![Alt text](/imagens_/image_normal.png)
-
-##### Divergência KL
-
-Existem duas funções de perda no treinamento de um VAE: Perda de Erro Quadrático Médio (MSE) para calcular a perda entre a imagem de entrada e a imagem reconstruída, e Divergência KL para calcular a distribuição codificada e a distribuição normal com média 0 e variância 1.0.
-
-###### MSE
-
-![Alt text](/imagens_/image_mse.png)
-
-
-###### Divergência KL entre dois Gaussianos
-
-Podemos calcular a divergência KL comparando dois Gaussianos.
-
-![Alt text](/imagens_/image_kl.png)
-
-Segue o caminho de dados do Autoencoder-KL:
-
-
-![Alt text](/imagens_/image_pathautoencoderkl.png)
-
-Neste imagem vemos que a imagem de entrada é passado por blocos de convolução até chegar em sua parte final do encoder, onde a rede ira gerar vetores com médias e desvios padrões com o objetivo de se aproximar da distribuição normal com média 0 e variância 1, após isto, essa representação latenre probabilistica é passada para o decoder, para que a imagem seja reconstruída novamente.
-
-#### Modelo de Difusão Latente
-
-### Métricas
-
-#### SSIM
-
-#### PSNR
-
-#### FID 
-
-## Metodologia
-
-
+Para dúvidas ou sugestões, consulte os scripts e docstrings nos arquivos fonte.
