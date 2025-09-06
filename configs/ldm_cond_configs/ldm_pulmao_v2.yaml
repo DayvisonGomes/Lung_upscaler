@@ -1,0 +1,45 @@
+ldm:
+  base_lr: 0.000025
+  params:
+    spatial_dims: 2
+    in_channels: 4 # 4, 5
+    out_channels: 4 # 4
+    num_res_blocks: 2
+    num_channels: [256, 256, 512]
+    attention_levels: [False, False, True]
+    #with_conditioning: True
+    #cross_attention_dim: 32768 # 512 pras masks, 1024 pra text
+    num_head_channels: [0, 0, 512] # 0,0,512
+    #num_class_embeds: 350 # 2
+  scheduler:
+    schedule: "scaled_linear_beta" # scaled_linear_beta
+    num_train_timesteps: 1000
+    beta_start: 0.0015
+    beta_end: 0.0195  # 0205
+
+# Agen
+# 4 canais latentes com 4 de saida, o resto permance igual a todos os exps
+
+# Bgen
+# 4 canais latentes com mais 1 da mascara, com saida de 4 canais
+# The LDM was trained with noisy latent representations concatenated with the segmentation mask and conditioned on a binary class (lung or no lung). 
+#ResNet18 was used as the mask encoder, with its output applied through cross-attention.
+
+# Cgen
+# The LDM was trained by concatenating noisy latent representations with a noisy mask, 
+#using the noise timestep applied to the mask for class conditioning. Similar to BGen, 
+#a ResNet18 was used as the mask encoder, with its output incorporated through cross-attention
+
+# DGen
+
+#The LDM was trained by concatenating noisy latent representations with the mask, 
+#using a binary class (lung or soft tissue) for class conditioning. 
+#A ResNet18 was used again as the mask encoder, with its output passing through cross attention. 
+#The loss function employed was a weighted MSE, as described in 15,1614,15 with the aim of pre-217
+#serving internal lung structures
+
+# Asr
+
+#The LDM was trained with noisy latent representations, concatenated with a low-resolution image, 
+#where the noise varied from 1 to 350 time steps applied by the diffusion process, 
+#along with a segmentation mask. Class conditioning was based on the time step of the noise introduced to the low-resolution image. MSE was used as the loss function.
