@@ -150,7 +150,6 @@ Principais scripts de preparação de dados (atenção: alguns podem estar desat
 
 ## Arquivos de Configuração e Scripts Úteis
 
-- `.dockerignore`, `.gitignore` — arquivos de suporte ao desenvolvimento.
 - `Dockerfile` e `create_image_docker.sh` — exemplo de criação de imagem Docker para reproduzir ambiente.
 - `requirements.txt` — dependências Python.
 

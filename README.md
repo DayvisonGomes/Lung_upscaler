@@ -150,7 +150,6 @@ Key data preparation scripts (some may be outdated):
 
 ## Configuration files and useful scripts
 
-- `.dockerignore`, `.gitignore`: development support files.
 - `Dockerfile` and `create_image_docker.sh`: example Docker setup to reproduce the environment.
 - `requirements.txt`: Python dependencies.
 
