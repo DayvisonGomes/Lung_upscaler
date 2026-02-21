@@ -156,5 +156,3 @@ Key data preparation scripts (some may be outdated):
 - For help running preprocessing, adjusting YAML configs, or reproducing experiments, contact: **ddayvisongomes11@gmail.com** — I can assist with execution, configuration and result interpretation.
 
 ---
-
-For more details, inspect the scripts in `src/` and read docstrings in the source files.
