@@ -97,10 +97,6 @@ The scripts under `src/test/` implement these metrics (see `calculate_metrics.py
 
 - The preprocessing pipeline in `src/preprocessing_data/` is partially outdated. If you need to run or adapt preprocessing scripts, contact me — some routines may require adjustments for current data.
 
-## Contact
-
-- Email: ddayvisongomes11@gmail.com
-
 ## Important files (quick reference)
 
 - [src/train/train_ldm.py](src/train/train_ldm.py)

@@ -97,10 +97,6 @@ Os scripts em `src/test/` implementam o cálculo destas métricas (veja `calcula
 
 - O pipeline de pré-processamento (`src/preprocessing_data/`) está parcialmente desatualizado. Se precisar executar ou adaptar scripts de pré-processamento, entre em contato comigo — algumas rotinas podem precisar de ajustes para os dados atuais.
 
-## Contatos
-
-- E-mail: ddayvisongomes11@gmail.com
-
 ## Arquivos importantes (referência rápida)
 
 - [src/train/train_ldm.py](src/train/train_ldm.py)
