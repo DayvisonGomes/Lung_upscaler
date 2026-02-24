@@ -48,21 +48,7 @@ def window_ct(dcm, w, c, ymin, ymax):
 
 def normalize_image(image, ymin, ymax):
     return (image - ymin) / (ymax - ymin)
-
-def create_lung_mask(image, threshold=0.5):
-    """Creates a binary mask to highlight lung structures.
-
-    Args:
-        image (np.array): The windowed CT image.
-        threshold (float): Relative threshold for segmentation.
-
-    Returns:
-        np.array: Binary mask with lung structures highlighted.
-    """
-    mask = np.zeros_like(image)
-    mask[image > threshold] = 1.0
-    return mask
-
+    
 def create_lung_mask(image, threshold=0.8):
     """Creates a binary mask to highlight lung structures.
 
@@ -182,4 +168,5 @@ if __name__ == '__main__':
         print(k)
             
             
+
             
